@@ -25,11 +25,18 @@
 			}
 
 			if (content) {
-				// The value returned by a script-targeted URL will be used as
-				// the iFrame's content. Create such a URL which returns the
-				// iFrame element's `srcdoc` attribute.
-				jsUrl = "javascript: window.frameElement.getAttribute('srcdoc');";
-
+				//Firefox fires off a "uncaught exception: ReferenceError: window is not defined"
+				//So urlencode the source into a data-URI
+				//Warning: we assume UTF8 here! (which any modern website should be using anyway)
+				if (/firefox/.exec(navigator.userAgent.toLowerCase())) {
+					jsUrl = "data:text/html;charset=utf8," + encodeURIComponent(content);
+				} else {
+					// The value returned by a script-targeted URL will be used as
+					// the iFrame's content. Create such a URL which returns the
+					// iFrame element's `srcdoc` attribute.
+					jsUrl = "javascript: window.frameElement.getAttribute('srcdoc');";
+				}
+				
 				iframe.setAttribute("src", jsUrl);
 
 				// Explicitly set the iFrame's window.location for
